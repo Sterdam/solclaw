@@ -1,0 +1,1108 @@
+{
+  "address": "J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H",
+  "metadata": {
+    "name": "solclaw",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Agent-to-Agent USDC payments by name on Solana"
+  },
+  "instructions": [
+    {
+      "name": "batch_payment",
+      "docs": [
+        "Batch pay multiple agents in one transaction.",
+        "Maximum 10 recipients per batch.",
+        "",
+        "Remaining accounts must be passed in order, for each recipient:",
+        "- recipient AgentRegistry (PDA) [writable]",
+        "- recipient vault token account (PDA) [writable]"
+      ],
+      "discriminator": [
+        117,
+        163,
+        173,
+        251,
+        106,
+        207,
+        191,
+        129
+      ],
+      "accounts": [
+        {
+          "name": "sender_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "payments",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "BatchPaymentEntry"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel_subscription",
+      "docs": [
+        "Cancel a subscription. Only the sender (authority) can cancel."
+      ],
+      "discriminator": [
+        60,
+        139,
+        189,
+        242,
+        191,
+        208,
+        143,
+        18
+      ],
+      "accounts": [
+        {
+          "name": "subscription",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_subscription",
+      "docs": [
+        "Create a new recurring payment subscription"
+      ],
+      "discriminator": [
+        65,
+        71,
+        10,
+        60,
+        249,
+        82,
+        197,
+        12
+      ],
+      "accounts": [
+        {
+          "name": "subscription",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  117,
+                  98,
+                  115,
+                  99,
+                  114,
+                  105,
+                  112,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry"
+              },
+              {
+                "kind": "account",
+                "path": "receiver_registry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender_registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiver_registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receiver_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "receiver_name",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "interval_seconds",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "deposit",
+      "docs": [
+        "Deposit USDC into the agent's vault"
+      ],
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "agent_registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "execute_subscription",
+      "docs": [
+        "Execute a due subscription payment. ANYONE can call this (permissionless crank)."
+      ],
+      "discriminator": [
+        77,
+        121,
+        39,
+        37,
+        183,
+        213,
+        72,
+        134
+      ],
+      "accounts": [
+        {
+          "name": "subscription",
+          "writable": true
+        },
+        {
+          "name": "sender_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiver_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receiver_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiver_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receiver_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "cranker",
+          "docs": [
+            "Anyone can crank — no authority constraint"
+          ],
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "register_agent",
+      "docs": [
+        "Register a new agent with a human-readable name",
+        "Creates a PDA vault for USDC storage"
+      ],
+      "discriminator": [
+        135,
+        157,
+        66,
+        195,
+        2,
+        113,
+        175,
+        30
+      ],
+      "accounts": [
+        {
+          "name": "agent_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "split_payment",
+      "docs": [
+        "Split a total USDC amount across multiple agents proportionally.",
+        "Shares must sum to exactly 10000 (100% in basis points).",
+        "Maximum 10 recipients.",
+        "",
+        "Remaining accounts: same pattern as batch_payment"
+      ],
+      "discriminator": [
+        142,
+        211,
+        58,
+        150,
+        156,
+        255,
+        35,
+        37
+      ],
+      "accounts": [
+        {
+          "name": "sender_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "total_amount",
+          "type": "u64"
+        },
+        {
+          "name": "recipients",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "SplitRecipient"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "transfer_by_name",
+      "docs": [
+        "Transfer USDC from sender vault to receiver vault by name"
+      ],
+      "discriminator": [
+        219,
+        202,
+        178,
+        165,
+        243,
+        88,
+        66,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "sender_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiver_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receiver_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiver_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "receiver_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "docs": [
+        "Withdraw USDC from vault to user's token account"
+      ],
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "agent_registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent_registry.name",
+                "account": "AgentRegistry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "destination",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AgentRegistry",
+      "discriminator": [
+        6,
+        34,
+        128,
+        124,
+        33,
+        136,
+        199,
+        171
+      ]
+    },
+    {
+      "name": "Subscription",
+      "discriminator": [
+        64,
+        7,
+        26,
+        135,
+        102,
+        132,
+        98,
+        33
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidNameLength",
+      "msg": "Name must be between 1 and 32 characters"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than 0"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMint",
+      "msg": "Invalid USDC mint address"
+    },
+    {
+      "code": 6003,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: you don't control this vault"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidBatchSize",
+      "msg": "Batch must contain 1-10 payments"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidRemainingAccounts",
+      "msg": "Wrong number of remaining accounts for batch/split"
+    },
+    {
+      "code": 6006,
+      "name": "NameMismatch",
+      "msg": "Recipient name does not match registry"
+    },
+    {
+      "code": 6007,
+      "name": "VaultMismatch",
+      "msg": "Vault does not match agent registry"
+    },
+    {
+      "code": 6008,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidSplitShares",
+      "msg": "Split shares must add up to 10000 basis points"
+    },
+    {
+      "code": 6010,
+      "name": "TooManySplitRecipients",
+      "msg": "Maximum 10 split recipients allowed"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidInterval",
+      "msg": "Subscription interval must be at least 60 seconds"
+    },
+    {
+      "code": 6012,
+      "name": "SubscriptionNotDue",
+      "msg": "Subscription is not yet due"
+    },
+    {
+      "code": 6013,
+      "name": "SubscriptionNotActive",
+      "msg": "Subscription is not active"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidSubscription",
+      "msg": "Invalid subscription: sender/receiver mismatch"
+    }
+  ],
+  "types": [
+    {
+      "name": "AgentRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "total_sent",
+            "type": "u64"
+          },
+          {
+            "name": "total_received",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BatchPaymentEntry",
+      "docs": [
+        "A single payment entry within a batch"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "recipient_name",
+            "docs": [
+              "The name of the recipient agent"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Amount in USDC smallest units (6 decimals)"
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SplitRecipient",
+      "docs": [
+        "A split recipient with their share in basis points"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "docs": [
+              "Agent name"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "share_bps",
+            "docs": [
+              "Share in basis points (5000 = 50%)"
+            ],
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Subscription",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sender",
+            "type": "pubkey"
+          },
+          {
+            "name": "receiver",
+            "type": "pubkey"
+          },
+          {
+            "name": "sender_name",
+            "type": "string"
+          },
+          {
+            "name": "receiver_name",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "interval_seconds",
+            "type": "i64"
+          },
+          {
+            "name": "last_executed",
+            "type": "i64"
+          },
+          {
+            "name": "next_due",
+            "type": "i64"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_paid",
+            "type": "u64"
+          },
+          {
+            "name": "execution_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+# Anchor
+.anchor
+target
+**/*.rs.bk
+test-ledger
+
+# Dependencies
+node_modules
+.yarn
+
+# Build outputs
+dist/
+
+# Environment
+.env
+.env.local
+*.pem
+*.key
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test
+coverage/
+
+# SSL certs
+nginx/ssl/
+certbot/
+
+# Keypairs (never commit)
+*-keypair.json
+id.json
+
+# Local Netlify folder
+.netlify

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolClaw - Agent-to-Agent USDC Payments on Solana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #14141f;
+            --border: #2a2a3f;
+            --text: #e4e4e7;
+            --text-dim: #71717a;
+            --primary: #2563eb;
+            --primary-dim: #1d4ed8;
+            --success: #22c55e;
+            --gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--text);
+        }
+
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+        }
+
+        .code-example {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 48px auto;
+            max-width: 700px;
+            text-align: left;
+        }
+
+        .code-example pre {
+            background: #0d0d14;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 14px;
+            color: #a5b4fc;
+        }
+
+        .code-example .comment {
+            color: var(--text-dim);
+        }
+
+        .code-example .string {
+            color: #34d399;
+        }
+
+        .features {
+            padding: 80px 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 48px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            transition: border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 15px;
+        }
+
+        .comparison {
+            padding: 80px 0;
+        }
+
+        .comparison h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 48px;
+        }
+
+        .comparison-table {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: #1a1a2e;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .highlight {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .dim {
+            color: var(--text-dim);
+        }
+
+        .try-it {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .try-it h2 {
+            font-size: 36px;
+            margin-bottom: 24px;
+        }
+
+        .try-it p {
+            color: var(--text-dim);
+            margin-bottom: 32px;
+        }
+
+        .api-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .api-example {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .api-example h4 {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .api-example pre {
+            background: #0d0d14;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            color: #a5b4fc;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        .footer-info {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        .footer-info code {
+            background: var(--surface);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">SolClaw <span>/ devnet</span></div>
+                <nav>
+                    <a href="#features">Features</a>
+                    <a href="#api">API</a>
+                    <a href="https://github.com/solclaw/solclaw" target="_blank">GitHub</a>
+                    <a href="https://explorer.solana.com/address/J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H?cluster=devnet" target="_blank">Explorer</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Send USDC by Name</h1>
+                <p>Agent-to-agent USDC payments on Solana. No wallet addresses. Just names. 3 seconds. Zero friction.</p>
+                <div class="hero-buttons">
+                    <a href="#api" class="btn btn-primary">Try the API</a>
+                    <a href="https://github.com/solclaw/solclaw" class="btn btn-secondary" target="_blank">View Source</a>
+                </div>
+
+                <div class="code-example">
+                    <pre><span class="comment"># Send 5 USDC to any agent by name</span>
+curl -X POST https://solclaw.xyz/api/send \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"from": "MyAgent", "to": "Nyx_Bot", "amount": 5}'</span>
+
+<span class="comment"># Response: Transaction ready in ~2 seconds</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <h2>Why SolClaw?</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>Name Resolution On-Chain</h3>
+                        <p>No off-chain DNS or oracles. Agent names resolve directly via Solana PDAs. Trustless and verifiable.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Batch Payments</h3>
+                        <p>Pay up to 10 agents in a single transaction. Efficient payroll and reward distribution.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Split Payments</h3>
+                        <p>Divide payments proportionally. Revenue sharing, royalty splits, automatic percentages.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Recurring Subscriptions</h3>
+                        <p>Set up automated recurring payments. Permissionless execution - anyone can crank.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Zero Address Errors</h3>
+                        <p>No more copy-pasting 44-character base58 addresses. Say "send to @Nyx_Bot" and it works.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Circle USDC</h3>
+                        <p>Uses official Circle USDC on Solana devnet. CCTP-ready architecture for cross-chain.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="comparison">
+            <div class="container">
+                <h2>Agent vs Human Payments</h2>
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Agent (SolClaw)</th>
+                                <th>Human (Manual)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Find recipient</td>
+                                <td class="highlight">0.1s (name lookup)</td>
+                                <td class="dim">30s+ (ask, search, copy)</td>
+                            </tr>
+                            <tr>
+                                <td>Build transaction</td>
+                                <td class="highlight">0.5s (automated)</td>
+                                <td class="dim">120s+ (wallet app, paste)</td>
+                            </tr>
+                            <tr>
+                                <td>Sign & send</td>
+                                <td class="highlight">0.3s (programmatic)</td>
+                                <td class="dim">30s+ (confirm, wait)</td>
+                            </tr>
+                            <tr>
+                                <td>Total time</td>
+                                <td class="highlight">~2 seconds</td>
+                                <td class="dim">4+ minutes</td>
+                            </tr>
+                            <tr>
+                                <td>Error rate</td>
+                                <td class="highlight">0%</td>
+                                <td class="dim">High (typos = lost funds)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="try-it" id="api">
+            <div class="container">
+                <h2>Try It Now</h2>
+                <p>Any agent can test the API immediately. No signup required.</p>
+
+                <div class="api-examples">
+                    <div class="api-example">
+                        <h4>Check Balance</h4>
+                        <pre>curl https://solclaw.xyz/api/balance/TestAgent</pre>
+                    </div>
+                    <div class="api-example">
+                        <h4>List All Agents</h4>
+                        <pre>curl https://solclaw.xyz/api/agents</pre>
+                    </div>
+                    <div class="api-example">
+                        <h4>Batch Payment</h4>
+                        <pre>curl -X POST https://solclaw.xyz/api/batch \
+  -H "Content-Type: application/json" \
+  -d '{"from":"MyAgent","payments":[
+    {"to":"Agent1","amount":10},
+    {"to":"Agent2","amount":5}
+  ]}'</pre>
+                    </div>
+                    <div class="api-example">
+                        <h4>Split Payment</h4>
+                        <pre>curl -X POST https://solclaw.xyz/api/split \
+  -H "Content-Type: application/json" \
+  -d '{"from":"MyAgent","totalAmount":100,
+  "recipients":[
+    {"name":"A","shareBps":5000},
+    {"name":"B","shareBps":5000}
+  ]}'</pre>
+                    </div>
+                    <div class="api-example">
+                        <h4>Create Subscription</h4>
+                        <pre>curl -X POST https://solclaw.xyz/api/subscribe \
+  -H "Content-Type: application/json" \
+  -d '{"from":"MyAgent","to":"Provider",
+  "amount":10,"intervalSeconds":86400}'</pre>
+                    </div>
+                    <div class="api-example">
+                        <h4>Due Subscriptions</h4>
+                        <pre>curl https://solclaw.xyz/api/subscriptions/due</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/solclaw/solclaw" target="_blank">GitHub</a>
+                <a href="https://explorer.solana.com/address/J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H?cluster=devnet" target="_blank">Explorer</a>
+                <a href="https://faucet.circle.com" target="_blank">USDC Faucet</a>
+                <a href="https://faucet.solana.com" target="_blank">SOL Faucet</a>
+            </div>
+            <div class="footer-info">
+                <p>Program ID: <code>J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H</code></p>
+                <p style="margin-top: 8px;">USDC Mint: <code>4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU</code></p>
+                <p style="margin-top: 16px; color: #52525b;">Built for the USDC Hackathon 2026 | Solana Devnet</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

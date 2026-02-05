@@ -1,0 +1,27 @@
+{
+  "name": "solclaw",
+  "version": "4.0.0",
+  "description": "Agent-to-Agent USDC payments on Solana - Serverless",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Serverless - no build needed'",
+    "deploy": "vercel --prod",
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vercel/node": "^3.0.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.0.3",
+    "prettier": "^2.6.2",
+    "typescript": "^5.0.0",
+    "vercel": "^37.0.0"
+  }
+}
