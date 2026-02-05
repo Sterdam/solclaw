@@ -7,7 +7,6 @@ import {
   TOKEN_PROGRAM_ID,
 } from "./shared";
 
-export const config = { runtime: "edge" };
 
 export default async function handler(req: Request) {
   if (req.method === "OPTIONS") {

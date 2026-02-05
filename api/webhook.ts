@@ -1,7 +1,6 @@
 import { jsonResponse, errorResponse, corsHeaders } from "./shared";
 import { createHmac, randomBytes } from "crypto";
 
-export const config = { runtime: "edge" };
 
 // In-memory webhook store (for hackathon/demo)
 // In production, use Redis or a database

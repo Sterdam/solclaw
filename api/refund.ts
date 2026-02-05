@@ -14,7 +14,6 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import BN from "bn.js";
 import { notifyWebhook } from "./webhook";
 
-export const config = { runtime: "edge" };
 
 /**
  * POST /api/refund - Refund a previous payment

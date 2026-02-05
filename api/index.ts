@@ -1,6 +1,5 @@
 import { jsonResponse, corsHeaders, PROGRAM_ID, USDC_MINT } from "./shared";
 
-export const config = { runtime: "edge" };
 
 export default function handler() {
   return jsonResponse({

@@ -15,7 +15,6 @@ import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js"
 import * as anchor from "@coral-xyz/anchor";
 import BN from "bn.js";
 
-export const config = { runtime: "edge" };
 
 /**
  * POST /api/invoice - Create a payment request (invoice)

@@ -7,7 +7,6 @@ import {
   INVOICE_STATUS_NAMES,
 } from "../shared";
 
-export const config = { runtime: "edge" };
 
 /**
  * GET /api/invoices/:name - List invoices for an agent

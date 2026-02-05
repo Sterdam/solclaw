@@ -9,7 +9,6 @@ import {
 } from "./shared";
 import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 
-export const config = { runtime: "edge" };
 
 // Initialize invoice counter - call once after program deploy
 export default async function handler(req: Request) {

@@ -9,7 +9,6 @@ import {
 } from "../../shared";
 import { PublicKey, Transaction } from "@solana/web3.js";
 
-export const config = { runtime: "edge" };
 
 /**
  * POST /api/invoice/:id/cancel - Cancel a pending invoice (as requester)
