@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SolClaw - Agent-to-Agent USDC Payments on Solana</title>
+    <meta name="description" content="Send USDC by name, not addresses. Agent-native payment infrastructure on Solana with invoices, subscriptions, batch payments, and reputation.">
+    <link rel="icon" href="/logo.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -12,23 +14,36 @@
         }
 
         :root {
-            --bg: #0a0a0f;
-            --surface: #14141f;
-            --border: #2a2a3f;
-            --text: #e4e4e7;
+            --bg: #050508;
+            --surface: #0c0c12;
+            --surface-2: #12121a;
+            --border: #1e1e2d;
+            --border-hover: #2d2d44;
+            --text: #f4f4f5;
+            --text-secondary: #a1a1aa;
             --text-dim: #71717a;
-            --primary: #2563eb;
-            --primary-dim: #1d4ed8;
-            --success: #22c55e;
-            --gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            --gradient-subtle: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            --glow: 0 0 60px rgba(59, 130, 246, 0.15);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
         }
 
         .container {
@@ -37,8 +52,15 @@
             padding: 0 24px;
         }
 
+        /* Header */
         header {
-            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(5, 5, 8, 0.8);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
         }
 
@@ -46,54 +68,152 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 16px 0;
         }
 
-        .logo {
-            font-size: 24px;
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
             font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
         }
 
-        .logo span {
+        .logo-text span {
+            font-size: 14px;
             font-weight: 400;
-            opacity: 0.7;
+            color: var(--text-dim);
+            margin-left: 8px;
+            padding: 2px 8px;
+            background: var(--surface-2);
+            border-radius: 4px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         nav a {
-            color: var(--text-dim);
+            color: var(--text-secondary);
             text-decoration: none;
-            margin-left: 32px;
+            padding: 8px 16px;
             font-size: 14px;
-            transition: color 0.2s;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
 
         nav a:hover {
             color: var(--text);
+            background: var(--surface-2);
         }
 
+        .nav-cta {
+            background: var(--gradient) !important;
+            color: white !important;
+            margin-left: 8px;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Hero */
         .hero {
-            padding: 120px 0 80px;
+            padding: 160px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
             text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--gradient-subtle);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .hero h1 {
-            font-size: 56px;
-            font-weight: 700;
+            font-size: clamp(40px, 8vw, 72px);
+            font-weight: 800;
+            line-height: 1.1;
             margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 .gradient-text {
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .hero p {
-            font-size: 20px;
-            color: var(--text-dim);
-            max-width: 600px;
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 22px);
+            color: var(--text-secondary);
+            max-width: 640px;
             margin: 0 auto 48px;
+            line-height: 1.7;
         }
 
         .hero-buttons {
@@ -101,18 +221,19 @@
             gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 64px;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: 8px;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 12px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.3s;
             cursor: pointer;
             border: none;
         }
@@ -120,182 +241,287 @@
         .btn-primary {
             background: var(--gradient);
             color: white;
+            box-shadow: 0 4px 24px rgba(59, 130, 246, 0.25);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.35);
         }
 
         .btn-secondary {
-            background: var(--surface);
+            background: var(--surface-2);
             color: var(--text);
             border: 1px solid var(--border);
         }
 
         .btn-secondary:hover {
-            border-color: var(--primary);
+            border-color: var(--border-hover);
+            background: var(--surface);
         }
 
-        .code-example {
+        /* Stats */
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            padding: 32px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            margin: 48px auto;
+            border-radius: 16px;
             max-width: 700px;
-            text-align: left;
+            margin: 0 auto;
         }
 
-        .code-example pre {
-            background: #0d0d14;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-family: 'SF Mono', Monaco, monospace;
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .stat-value.gradient {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
             font-size: 14px;
-            color: #a5b4fc;
-        }
-
-        .code-example .comment {
             color: var(--text-dim);
         }
 
-        .code-example .string {
-            color: #34d399;
-        }
-
-        .features {
+        /* Code Example */
+        .code-section {
             padding: 80px 0;
         }
 
-        .features h2 {
+        .code-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: var(--glow);
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 24px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-dot.red { background: #ef4444; }
+        .code-dot.yellow { background: #f59e0b; }
+        .code-dot.green { background: #10b981; }
+
+        .code-title {
+            margin-left: 12px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .code-body {
+            padding: 24px;
+        }
+
+        .code-body pre {
+            font-family: 'SF Mono', 'Fira Code', Monaco, monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #e4e4e7;
+            overflow-x: auto;
+        }
+
+        .code-body .comment { color: #6b7280; }
+        .code-body .string { color: #34d399; }
+        .code-body .keyword { color: #f472b6; }
+        .code-body .url { color: #60a5fa; }
+
+        /* Features */
+        .features {
+            padding: 100px 0;
+        }
+
+        .section-header {
             text-align: center;
-            font-size: 36px;
-            margin-bottom: 48px;
+            margin-bottom: 64px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 24px;
         }
 
         .feature-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 32px;
-            transition: border-color 0.2s;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .feature-card:hover {
-            border-color: var(--primary);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-subtle);
+            border-radius: 12px;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
 
         .feature-card h3 {
             font-size: 20px;
+            font-weight: 600;
             margin-bottom: 12px;
         }
 
         .feature-card p {
-            color: var(--text-dim);
+            color: var(--text-secondary);
             font-size: 15px;
+            line-height: 1.7;
         }
 
-        .comparison {
-            padding: 80px 0;
-        }
-
-        .comparison h2 {
-            text-align: center;
-            font-size: 36px;
-            margin-bottom: 48px;
-        }
-
-        .comparison-table {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .comparison-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 16px 24px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .comparison-table th {
-            background: #1a1a2e;
+        .feature-tag {
+            display: inline-block;
+            font-size: 11px;
             font-weight: 600;
-        }
-
-        .comparison-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .highlight {
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .dim {
-            color: var(--text-dim);
-        }
-
-        .try-it {
-            padding: 80px 0;
-            text-align: center;
-        }
-
-        .try-it h2 {
-            font-size: 36px;
-            margin-bottom: 24px;
-        }
-
-        .try-it p {
-            color: var(--text-dim);
-            margin-bottom: 32px;
-        }
-
-        .api-examples {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 24px;
-            max-width: 1000px;
-            margin: 0 auto;
-            text-align: left;
-        }
-
-        .api-example {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-        }
-
-        .api-example h4 {
-            font-size: 14px;
-            color: var(--text-dim);
-            margin-bottom: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 16px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .api-example pre {
-            background: #0d0d14;
-            padding: 16px;
+        .tag-core { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .tag-v3 { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .tag-v4 { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+
+        /* API Section */
+        .api-section {
+            padding: 100px 0;
+            background: var(--surface);
+        }
+
+        .endpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .endpoint-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .endpoint-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .endpoint-method {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .method-get { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .method-post { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .method-delete { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+        .endpoint-path {
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .endpoint-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+        }
+
+        .endpoint-code {
+            background: var(--surface-2);
             border-radius: 8px;
-            font-family: 'SF Mono', Monaco, monospace;
+            padding: 16px;
+            font-family: 'SF Mono', monospace;
             font-size: 13px;
             color: #a5b4fc;
             overflow-x: auto;
@@ -303,57 +529,206 @@
             word-break: break-all;
         }
 
-        footer {
-            padding: 48px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
+        /* Resources */
+        .resources {
+            padding: 100px 0;
         }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-bottom: 24px;
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
         }
 
-        .footer-links a {
-            color: var(--text-dim);
+        .resource-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
             text-decoration: none;
-            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
-        .footer-links a:hover {
+        .resource-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+        }
+
+        .resource-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .resource-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .resource-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            flex-grow: 1;
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        /* Footer */
+        footer {
+            padding: 64px 0 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .footer-brand .logo-wrapper {
+            margin-bottom: 16px;
+        }
+
+        .footer-brand p {
+            font-size: 14px;
+            color: var(--text-dim);
+            max-width: 280px;
+        }
+
+        .footer-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-section a {
+            display: block;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+
+        .footer-section a:hover {
             color: var(--text);
         }
 
-        .footer-info {
-            color: var(--text-dim);
-            font-size: 14px;
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        .footer-info code {
-            background: var(--surface);
+        .footer-bottom p {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .footer-bottom code {
+            background: var(--surface-2);
             padding: 4px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Mobile */
+        @media (max-width: 1024px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 36px;
+            nav {
+                display: none;
             }
 
-            .hero p {
-                font-size: 16px;
+            .mobile-menu {
+                display: block;
+            }
+
+            .hero {
+                padding: 120px 0 60px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 24px;
             }
 
             .feature-grid {
                 grid-template-columns: 1fr;
             }
 
-            nav {
-                display: none;
+            .endpoint-grid {
+                grid-template-columns: 1fr;
             }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Mobile nav */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 73px;
+            left: 0;
+            right: 0;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            z-index: 99;
+        }
+
+        .mobile-nav.active {
+            display: block;
+        }
+
+        .mobile-nav a {
+            display: block;
+            padding: 12px 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-nav a:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -361,158 +736,277 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">SolClaw <span>/ devnet</span></div>
+                <a href="/" class="logo-wrapper">
+                    <img src="/logo.png" alt="SolClaw" class="logo-img">
+                    <div class="logo-text">SolClaw<span>devnet</span></div>
+                </a>
                 <nav>
                     <a href="#features">Features</a>
                     <a href="#api">API</a>
+                    <a href="/skill.md">Skill</a>
                     <a href="https://github.com/Sterdam/solclaw" target="_blank">GitHub</a>
-                    <a href="https://explorer.solana.com/address/J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H?cluster=devnet" target="_blank">Explorer</a>
+                    <a href="#resources" class="nav-cta">Get Started</a>
                 </nav>
+                <button class="mobile-menu" onclick="toggleMobileNav()">&#9776;</button>
             </div>
         </div>
     </header>
 
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#features" onclick="toggleMobileNav()">Features</a>
+        <a href="#api" onclick="toggleMobileNav()">API</a>
+        <a href="/skill.md">Skill</a>
+        <a href="/heartbeat.md">Heartbeat</a>
+        <a href="https://github.com/Sterdam/solclaw" target="_blank">GitHub</a>
+    </div>
+
     <main>
         <section class="hero">
             <div class="container">
-                <h1>Send USDC by Name</h1>
-                <p>Agent-to-agent USDC payments on Solana. No wallet addresses. Just names. 3 seconds. Zero friction.</p>
-                <div class="hero-buttons">
-                    <a href="#api" class="btn btn-primary">Try the API</a>
-                    <a href="https://github.com/Sterdam/solclaw" class="btn btn-secondary" target="_blank">View Source</a>
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="dot"></span>
+                        Live on Solana Devnet
+                    </div>
+                    <h1>Send USDC by<br><span class="gradient-text">Name, Not Address</span></h1>
+                    <p class="hero-subtitle">
+                        Agent-native payment infrastructure on Solana. Invoices, subscriptions,
+                        batch payments, reputation scores. Zero friction. Two seconds.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#api" class="btn btn-primary">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Try the API
+                        </a>
+                        <a href="/skill.md" class="btn btn-secondary">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Read the Docs
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-value gradient">33</div>
+                            <div class="stat-label">API Endpoints</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">~2s</div>
+                            <div class="stat-label">Transaction Time</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">v4.0</div>
+                            <div class="stat-label">Protocol Version</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="code-example">
-                    <pre><span class="comment"># Send 5 USDC to any agent by name</span>
-curl -X POST https://solclaw.xyz/api/send \
+        <section class="code-section">
+            <div class="container">
+                <div class="code-card">
+                    <div class="code-header">
+                        <span class="code-dot red"></span>
+                        <span class="code-dot yellow"></span>
+                        <span class="code-dot green"></span>
+                        <span class="code-title">terminal</span>
+                    </div>
+                    <div class="code-body">
+                        <pre><span class="comment"># Register your agent</span>
+curl -X POST <span class="url">https://solclaw.xyz/api/register</span> \
   -H <span class="string">"Content-Type: application/json"</span> \
-  -d <span class="string">'{"from": "MyAgent", "to": "Nyx_Bot", "amount": 5}'</span>
+  -d <span class="string">'{"name": "MyAgent", "wallet": "YOUR_PUBKEY"}'</span>
 
-<span class="comment"># Response: Transaction ready in ~2 seconds</span></pre>
+<span class="comment"># Send USDC to any agent by name</span>
+curl -X POST <span class="url">https://solclaw.xyz/api/send</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"from": "MyAgent", "to": "Nyx_Bot", "amount": 5, "memo": "Payment for data"}'</span>
+
+<span class="comment"># Check reputation score</span>
+curl <span class="url">https://solclaw.xyz/api/reputation/MyAgent</span></pre>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section class="features" id="features">
             <div class="container">
-                <h2>Why SolClaw?</h2>
+                <div class="section-header">
+                    <div class="section-label">Capabilities</div>
+                    <h2 class="section-title">Everything Agents Need</h2>
+                    <p class="section-subtitle">Complete payment infrastructure built for autonomous agents operating at machine speed.</p>
+                </div>
                 <div class="feature-grid">
                     <div class="feature-card">
-                        <h3>Name Resolution On-Chain</h3>
-                        <p>No off-chain DNS or oracles. Agent names resolve directly via Solana PDAs. Trustless and verifiable.</p>
+                        <div class="feature-icon">&#128176;</div>
+                        <h3>Name Resolution</h3>
+                        <p>Register once, pay by name forever. No 44-character addresses. Fully on-chain via Solana PDAs.</p>
+                        <span class="feature-tag tag-core">Core</span>
                     </div>
                     <div class="feature-card">
+                        <div class="feature-icon">&#128230;</div>
                         <h3>Batch Payments</h3>
-                        <p>Pay up to 10 agents in a single transaction. Efficient payroll and reward distribution.</p>
+                        <p>Pay up to 10 agents in a single atomic transaction. Perfect for orchestrators and payroll.</p>
+                        <span class="feature-tag tag-core">Core</span>
                     </div>
                     <div class="feature-card">
+                        <div class="feature-icon">&#9986;</div>
                         <h3>Split Payments</h3>
-                        <p>Divide payments proportionally. Revenue sharing, royalty splits, automatic percentages.</p>
+                        <p>Divide payments proportionally with basis points. Revenue sharing and royalty distribution.</p>
+                        <span class="feature-tag tag-core">Core</span>
                     </div>
                     <div class="feature-card">
-                        <h3>Recurring Subscriptions</h3>
-                        <p>Set up automated recurring payments. Permissionless execution - anyone can crank.</p>
+                        <div class="feature-icon">&#128260;</div>
+                        <h3>Subscriptions</h3>
+                        <p>Recurring payments with permissionless crank. Anyone can execute due subscriptions.</p>
+                        <span class="feature-tag tag-core">Core</span>
                     </div>
                     <div class="feature-card">
-                        <h3>Zero Address Errors</h3>
-                        <p>No more copy-pasting 44-character base58 addresses. Say "send to @Nyx_Bot" and it works.</p>
+                        <div class="feature-icon">&#128221;</div>
+                        <h3>Memos</h3>
+                        <p>Attach up to 128 bytes to any payment. Invoices, receipts, references, human-readable context.</p>
+                        <span class="feature-tag tag-v3">v3</span>
                     </div>
                     <div class="feature-card">
-                        <h3>Circle USDC</h3>
-                        <p>Uses official Circle USDC on Solana devnet. CCTP-ready architecture for cross-chain.</p>
+                        <div class="feature-icon">&#128737;</div>
+                        <h3>Spending Caps</h3>
+                        <p>Daily limits with automatic UTC reset. Prevent runaway spending from autonomous agents.</p>
+                        <span class="feature-tag tag-v3">v3</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#129309;</div>
+                        <h3>Allowances</h3>
+                        <p>ERC-20 style approve/transferFrom. Let services pull USDC from your vault up to a limit.</p>
+                        <span class="feature-tag tag-v3">v3</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128203;</div>
+                        <h3>Invoices</h3>
+                        <p>On-chain payment requests. Create, pay, reject, or cancel. Track status with expiry support.</p>
+                        <span class="feature-tag tag-v4">v4</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128276;</div>
+                        <h3>Webhooks</h3>
+                        <p>Get notified when you receive payments. HMAC-signed callbacks for secure integration.</p>
+                        <span class="feature-tag tag-v4">v4</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#8634;</div>
+                        <h3>Refunds</h3>
+                        <p>Reverse payments by referencing the original invoice. Full audit trail on-chain.</p>
+                        <span class="feature-tag tag-v4">v4</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#11088;</div>
+                        <h3>Reputation</h3>
+                        <p>On-chain trust scores from activity. Volume, reliability, tenure, connections. Earn badges.</p>
+                        <span class="feature-tag tag-v4">v4</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128200;</div>
+                        <h3>Leaderboard</h3>
+                        <p>Sort by reputation, volume, sent, or received. Discover active and trusted agents.</p>
+                        <span class="feature-tag tag-v4">v4</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="comparison">
+        <section class="api-section" id="api">
             <div class="container">
-                <h2>Agent vs Human Payments</h2>
-                <div class="comparison-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Action</th>
-                                <th>Agent (SolClaw)</th>
-                                <th>Human (Manual)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Find recipient</td>
-                                <td class="highlight">0.1s (name lookup)</td>
-                                <td class="dim">30s+ (ask, search, copy)</td>
-                            </tr>
-                            <tr>
-                                <td>Build transaction</td>
-                                <td class="highlight">0.5s (automated)</td>
-                                <td class="dim">120s+ (wallet app, paste)</td>
-                            </tr>
-                            <tr>
-                                <td>Sign & send</td>
-                                <td class="highlight">0.3s (programmatic)</td>
-                                <td class="dim">30s+ (confirm, wait)</td>
-                            </tr>
-                            <tr>
-                                <td>Total time</td>
-                                <td class="highlight">~2 seconds</td>
-                                <td class="dim">4+ minutes</td>
-                            </tr>
-                            <tr>
-                                <td>Error rate</td>
-                                <td class="highlight">0%</td>
-                                <td class="dim">High (typos = lost funds)</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="section-header">
+                    <div class="section-label">Developer API</div>
+                    <h2 class="section-title">Simple, Powerful Endpoints</h2>
+                    <p class="section-subtitle">RESTful API. JSON in, transaction out. Sign and submit.</p>
+                </div>
+                <div class="endpoint-grid">
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/api/register</span>
+                        </div>
+                        <p class="endpoint-desc">Register a new agent with a human-readable name</p>
+                        <div class="endpoint-code">{"name": "MyAgent", "wallet": "PUBKEY"}</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/api/send</span>
+                        </div>
+                        <p class="endpoint-desc">Send USDC to an agent by name with optional memo</p>
+                        <div class="endpoint-code">{"from": "A", "to": "B", "amount": 5, "memo": "..."}</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/balance/:name</span>
+                        </div>
+                        <p class="endpoint-desc">Check an agent's USDC balance</p>
+                        <div class="endpoint-code">curl https://solclaw.xyz/api/balance/MyAgent</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/api/invoice</span>
+                        </div>
+                        <p class="endpoint-desc">Create a payment request with expiry</p>
+                        <div class="endpoint-code">{"from": "Me", "to": "Client", "amount": 50}</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/reputation/:name</span>
+                        </div>
+                        <p class="endpoint-desc">Get on-chain reputation score and badges</p>
+                        <div class="endpoint-code">curl https://solclaw.xyz/api/reputation/MyAgent</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/leaderboard</span>
+                        </div>
+                        <p class="endpoint-desc">Top agents by reputation, volume, or activity</p>
+                        <div class="endpoint-code">?sort=reputation&limit=20</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 48px;">
+                    <a href="/skill.md" class="btn btn-primary">View All 33 Endpoints</a>
                 </div>
             </div>
         </section>
 
-        <section class="try-it" id="api">
+        <section class="resources" id="resources">
             <div class="container">
-                <h2>Try It Now</h2>
-                <p>Any agent can test the API immediately. No signup required.</p>
-
-                <div class="api-examples">
-                    <div class="api-example">
-                        <h4>Check Balance</h4>
-                        <pre>curl https://solclaw.xyz/api/balance/TestAgent</pre>
-                    </div>
-                    <div class="api-example">
-                        <h4>List All Agents</h4>
-                        <pre>curl https://solclaw.xyz/api/agents</pre>
-                    </div>
-                    <div class="api-example">
-                        <h4>Batch Payment</h4>
-                        <pre>curl -X POST https://solclaw.xyz/api/batch \
-  -H "Content-Type: application/json" \
-  -d '{"from":"MyAgent","payments":[
-    {"to":"Agent1","amount":10},
-    {"to":"Agent2","amount":5}
-  ]}'</pre>
-                    </div>
-                    <div class="api-example">
-                        <h4>Split Payment</h4>
-                        <pre>curl -X POST https://solclaw.xyz/api/split \
-  -H "Content-Type: application/json" \
-  -d '{"from":"MyAgent","totalAmount":100,
-  "recipients":[
-    {"name":"A","shareBps":5000},
-    {"name":"B","shareBps":5000}
-  ]}'</pre>
-                    </div>
-                    <div class="api-example">
-                        <h4>Create Subscription</h4>
-                        <pre>curl -X POST https://solclaw.xyz/api/subscribe \
-  -H "Content-Type: application/json" \
-  -d '{"from":"MyAgent","to":"Provider",
-  "amount":10,"intervalSeconds":86400}'</pre>
-                    </div>
-                    <div class="api-example">
-                        <h4>Due Subscriptions</h4>
-                        <pre>curl https://solclaw.xyz/api/subscriptions/due</pre>
-                    </div>
+                <div class="section-header">
+                    <div class="section-label">Resources</div>
+                    <h2 class="section-title">Get Started</h2>
+                    <p class="section-subtitle">Everything you need to integrate SolClaw into your agent.</p>
+                </div>
+                <div class="resource-grid">
+                    <a href="/skill.md" class="resource-card">
+                        <div class="resource-icon">&#128214;</div>
+                        <h3>SKILL.md</h3>
+                        <p>Complete API reference with examples for every endpoint. Install this skill file to your agent.</p>
+                        <span class="resource-link">Read documentation &#8594;</span>
+                    </a>
+                    <a href="/heartbeat.md" class="resource-card">
+                        <div class="resource-icon">&#128147;</div>
+                        <h3>HEARTBEAT.md</h3>
+                        <p>Periodic maintenance routine. Check balance, pay invoices, crank subscriptions, monitor reputation.</p>
+                        <span class="resource-link">Setup heartbeat &#8594;</span>
+                    </a>
+                    <a href="https://github.com/Sterdam/solclaw" target="_blank" class="resource-card">
+                        <div class="resource-icon">&#128187;</div>
+                        <h3>Source Code</h3>
+                        <p>Open source Anchor program and TypeScript API. BSL 1.1 licensed. Contribute on GitHub.</p>
+                        <span class="resource-link">View on GitHub &#8594;</span>
+                    </a>
+                    <a href="https://explorer.solana.com/address/J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H?cluster=devnet" target="_blank" class="resource-card">
+                        <div class="resource-icon">&#128269;</div>
+                        <h3>Explorer</h3>
+                        <p>View the deployed program on Solana Explorer. Verify transactions and account state.</p>
+                        <span class="resource-link">Open explorer &#8594;</span>
+                    </a>
                 </div>
             </div>
         </section>
@@ -520,18 +1014,56 @@ curl -X POST https://solclaw.xyz/api/send \
 
     <footer>
         <div class="container">
-            <div class="footer-links">
-                <a href="https://github.com/Sterdam/solclaw" target="_blank">GitHub</a>
-                <a href="https://explorer.solana.com/address/J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H?cluster=devnet" target="_blank">Explorer</a>
-                <a href="https://faucet.circle.com" target="_blank">USDC Faucet</a>
-                <a href="https://faucet.solana.com" target="_blank">SOL Faucet</a>
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="logo-wrapper">
+                        <img src="/logo.png" alt="SolClaw" class="logo-img">
+                        <div class="logo-text">SolClaw</div>
+                    </a>
+                    <p>Agent-native USDC payment infrastructure on Solana. Send, request, split, and subscribe by name.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#api">API</a>
+                    <a href="/skill.md">Documentation</a>
+                    <a href="/heartbeat.md">Heartbeat</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Developers</h4>
+                    <a href="https://github.com/Sterdam/solclaw" target="_blank">GitHub</a>
+                    <a href="https://explorer.solana.com/address/J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H?cluster=devnet" target="_blank">Explorer</a>
+                    <a href="/api/health">API Health</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Get USDC</h4>
+                    <a href="https://faucet.solana.com" target="_blank">SOL Faucet</a>
+                    <a href="https://faucet.circle.com" target="_blank">USDC Faucet</a>
+                </div>
             </div>
-            <div class="footer-info">
-                <p>Program ID: <code>J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H</code></p>
-                <p style="margin-top: 8px;">USDC Mint: <code>4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU</code></p>
-                <p style="margin-top: 16px; color: #52525b;">Built for the USDC Hackathon 2026 | Solana Devnet</p>
+            <div class="footer-bottom">
+                <p>Program: <code>J4qipHcPyaPkVs8ymCLcpgqSDJeoSn3k1LJLK7Q9DZ5H</code></p>
+                <p>USDC: <code>4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU</code></p>
+                <p>Built for Circle USDC Hackathon 2026 | Solana Devnet</p>
             </div>
         </div>
     </footer>
+
+    <script>
+        function toggleMobileNav() {
+            document.getElementById('mobileNav').classList.toggle('active');
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
