@@ -238,7 +238,28 @@ pub mod solclaw {
         for (i, payment) in payments.iter().enumerate() {
             require!(payment.amount > 0, SolclawError::InvalidAmount);
 
+            let recipient_registry_info = &remaining[i * 2];
             let recipient_vault_info = &remaining[i * 2 + 1];
+
+            // Validate recipient registry PDA
+            let (expected_registry_pda, _) = Pubkey::find_program_address(
+                &[b"agent", payment.recipient_name.as_bytes()],
+                ctx.program_id,
+            );
+            require!(
+                recipient_registry_info.key() == expected_registry_pda,
+                SolclawError::NameMismatch
+            );
+
+            // Validate recipient vault PDA
+            let (expected_vault_pda, _) = Pubkey::find_program_address(
+                &[b"vault", payment.recipient_name.as_bytes()],
+                ctx.program_id,
+            );
+            require!(
+                recipient_vault_info.key() == expected_vault_pda,
+                SolclawError::VaultMismatch
+            );
 
             // Transfer USDC
             token::transfer(
@@ -353,7 +374,28 @@ pub mod solclaw {
                 continue;
             }
 
+            let recipient_registry_info = &remaining[i * 2];
             let recipient_vault_info = &remaining[i * 2 + 1];
+
+            // Validate recipient registry PDA
+            let (expected_registry_pda, _) = Pubkey::find_program_address(
+                &[b"agent", recipient.name.as_bytes()],
+                ctx.program_id,
+            );
+            require!(
+                recipient_registry_info.key() == expected_registry_pda,
+                SolclawError::NameMismatch
+            );
+
+            // Validate recipient vault PDA
+            let (expected_vault_pda, _) = Pubkey::find_program_address(
+                &[b"vault", recipient.name.as_bytes()],
+                ctx.program_id,
+            );
+            require!(
+                recipient_vault_info.key() == expected_vault_pda,
+                SolclawError::VaultMismatch
+            );
 
             // Transfer
             token::transfer(
@@ -1396,7 +1438,12 @@ pub struct CancelSubscription<'info> {
 // v3: Spending Cap Accounts
 #[derive(Accounts)]
 pub struct SetDailyLimit<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"agent", registry.name.as_bytes()],
+        bump = registry.bump,
+        constraint = registry.authority == authority.key() @ SolclawError::Unauthorized
+    )]
     pub registry: Account<'info, AgentRegistry>,
 
     pub authority: Signer<'info>,
@@ -1484,7 +1531,16 @@ pub struct TransferFrom<'info> {
 
 #[derive(Accounts)]
 pub struct RevokeAllowance<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [
+            b"allowance",
+            allowance.owner.as_ref(),
+            allowance.spender.as_ref(),
+        ],
+        bump = allowance.bump,
+        constraint = allowance.authority == authority.key() @ SolclawError::Unauthorized
+    )]
     pub allowance: Account<'info, Allowance>,
 
     pub authority: Signer<'info>,
@@ -1492,7 +1548,16 @@ pub struct RevokeAllowance<'info> {
 
 #[derive(Accounts)]
 pub struct ModifyAllowance<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [
+            b"allowance",
+            allowance.owner.as_ref(),
+            allowance.spender.as_ref(),
+        ],
+        bump = allowance.bump,
+        constraint = allowance.authority == authority.key() @ SolclawError::Unauthorized
+    )]
     pub allowance: Account<'info, Allowance>,
 
     pub authority: Signer<'info>,
@@ -1582,9 +1647,19 @@ pub struct PayInvoice<'info> {
 
 #[derive(Accounts)]
 pub struct RejectInvoice<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"invoice", invoice.id.to_le_bytes().as_ref()],
+        bump = invoice.bump,
+        constraint = invoice.payer == payer_registry.key() @ SolclawError::InvoiceMismatch
+    )]
     pub invoice: Account<'info, Invoice>,
 
+    #[account(
+        seeds = [b"agent", payer_registry.name.as_bytes()],
+        bump = payer_registry.bump,
+        constraint = payer_registry.authority == authority.key() @ SolclawError::Unauthorized
+    )]
     pub payer_registry: Account<'info, AgentRegistry>,
 
     pub authority: Signer<'info>,
@@ -1592,7 +1667,12 @@ pub struct RejectInvoice<'info> {
 
 #[derive(Accounts)]
 pub struct CancelInvoice<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"invoice", invoice.id.to_le_bytes().as_ref()],
+        bump = invoice.bump,
+        constraint = invoice.authority == authority.key() @ SolclawError::Unauthorized
+    )]
     pub invoice: Account<'info, Invoice>,
 
     pub authority: Signer<'info>,
