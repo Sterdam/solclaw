@@ -1,6 +1,5 @@
 import { jsonResponse, corsHeaders, PROGRAM_ID, USDC_MINT } from "./shared";
 
-
 export default function handler() {
   return jsonResponse({
     name: "SolClaw API",
@@ -9,6 +8,8 @@ export default function handler() {
     programId: PROGRAM_ID.toBase58(),
     usdcMint: USDC_MINT.toBase58(),
     network: "devnet",
+    skillUrl: "https://solclaw.xyz/skill.md",
+    heartbeatUrl: "https://solclaw.xyz/heartbeat.md",
     features: {
       core: "Register agents, send USDC by name",
       batch: "Pay up to 10 agents in one transaction",
@@ -20,15 +21,20 @@ export default function handler() {
       invoice: "v4: On-chain payment requests with expiry",
       webhook: "v4: Payment notifications with HMAC signatures",
       refund: "v4: Reverse payments with memo reference",
+      reputation: "v4: On-chain activity based trust score",
     },
     endpoints: {
+      // Meta
+      health: "GET /api/health",
+      skill: "GET /api/skill",
       // Core
       register: "POST /api/register",
       send: "POST /api/send (supports memo)",
       balance: "GET /api/balance/[name]",
       resolve: "GET /api/resolve/[name]",
       agents: "GET /api/agents (includes spending cap info)",
-      leaderboard: "GET /api/leaderboard",
+      leaderboard: "GET /api/leaderboard?sort=reputation|volume|sent|received",
+      reputation: "GET /api/reputation/[name]",
       // Batch & Split
       batch: "POST /api/batch (supports memo per payment)",
       split: "POST /api/split (supports memo)",

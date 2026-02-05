@@ -31,15 +31,26 @@ import invoicesHandler from "./api/invoices/[name]";
 import webhookHandler from "./api/webhook";
 import refundHandler from "./api/refund";
 
+// v4.1: Reputation, Health, Skill handlers
+import healthHandler from "./api/health";
+import skillHandler from "./api/skill";
+import reputationHandler from "./api/reputation/[name]";
+
 // Dynamic imports for path-based handlers
 import balanceHandler from "./api/balance/[name]";
 import resolveHandler from "./api/resolve/[name]";
+
+// Static file serving
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const PORT = 3000;
 
 // Route mapping
 const routes: Record<string, (req: Request) => Promise<Response>> = {
   "/api": indexHandler,
+  "/api/health": healthHandler,
+  "/api/skill": skillHandler,
   "/api/agents": agentsHandler,
   "/api/leaderboard": leaderboardHandler,
   "/api/due": dueHandler,
@@ -63,10 +74,38 @@ const routes: Record<string, (req: Request) => Promise<Response>> = {
   "/api/refund": refundHandler,
 };
 
+// Serve static markdown files
+function serveStaticFile(filePath: string, contentType: string): Response {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+    return new Response(content, {
+      headers: {
+        "Content-Type": contentType,
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  } catch {
+    return new Response("Not found", { status: 404 });
+  }
+}
+
 // Extract path param handlers
 function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname;
+
+  // Static files
+  if (path === "/skill.md") {
+    return Promise.resolve(
+      serveStaticFile(join(__dirname, "public/skill.md"), "text/markdown; charset=utf-8")
+    );
+  }
+
+  if (path === "/heartbeat.md") {
+    return Promise.resolve(
+      serveStaticFile(join(__dirname, "public/heartbeat.md"), "text/markdown; charset=utf-8")
+    );
+  }
 
   // Direct route match
   if (routes[path]) {
@@ -80,6 +119,10 @@ function handleRequest(req: Request): Promise<Response> {
 
   if (path.startsWith("/api/resolve/")) {
     return resolveHandler(req);
+  }
+
+  if (path.startsWith("/api/reputation/")) {
+    return reputationHandler(req);
   }
 
   // v4: Invoice dynamic routes
@@ -114,11 +157,18 @@ function handleRequest(req: Request): Promise<Response> {
 
 console.log(`Starting local test server on http://localhost:${PORT}`);
 console.log("Available endpoints:");
+console.log("  -- Static Files --");
+console.log("  GET  /skill.md         - Skill definition");
+console.log("  GET  /heartbeat.md     - Heartbeat routine");
+console.log("  -- Core API --");
 console.log("  GET  /api              - API info (v4.0.0)");
+console.log("  GET  /api/health       - Health check");
+console.log("  GET  /api/skill        - Skill JSON");
 console.log("  GET  /api/agents       - List agents");
 console.log("  GET  /api/balance/:name - Get balance");
 console.log("  GET  /api/resolve/:name - Resolve name");
-console.log("  GET  /api/leaderboard  - Leaderboard");
+console.log("  GET  /api/leaderboard  - Leaderboard (sort=reputation|volume|sent|received)");
+console.log("  GET  /api/reputation/:name - Agent reputation score");
 console.log("  GET  /api/due          - Due subscriptions");
 console.log("  GET  /api/subscriptions - All subscriptions");
 console.log("  GET  /api/allowances   - List allowances");
